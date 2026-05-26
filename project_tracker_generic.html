@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Tracker — Automatización IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Epilogue:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ffffff;
+  --surf:#f7f7f8;
+  --surf2:#f0f0f2;
+  --surf3:#e8e8ec;
+  --border:#e2e2e8;
+  --border2:#c8c8d4;
+  --text:#18181c;
+  --muted:#8888a0;
+  --faint:#f2f2f6;
+  --orange:#d95f2b;
+  --blue:#2b6fd9;
+  --green:#1db87a;
+  --yellow:#c9920a;
+  --purple:#7c3ae8;
+  --red:#d92b4a;
+  --done-bg:#f4fdf8;
+  --done-border:#b8e8d0;
+  --shadow:0 1px 4px rgba(0,0,0,.07);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Epilogue',sans-serif;font-size:13px;min-height:100vh;}
+
+/* ── TOPBAR ── */
+.topbar{position:sticky;top:0;z-index:300;background:#fff;border-bottom:1px solid var(--border);height:46px;display:flex;align-items:center;padding:0 18px;gap:0;box-shadow:var(--shadow);}
+.brand{font-family:'Syne',sans-serif;font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--orange);margin-right:20px;white-space:nowrap;}
+.tabs{display:flex;height:100%;overflow-x:auto;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:0 14px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:all .2s;height:100%;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--text);border-bottom-color:var(--orange);}
+.topbar-end{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.proj-name{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);padding:4px 10px;border:1px solid var(--border);border-radius:4px;outline:none;background:var(--faint);min-width:180px;}
+.proj-name:focus{color:var(--text);border-color:var(--border2);background:#fff;}
+
+/* ── PAGES ── */
+.page{display:none;padding:22px 20px;max-width:1100px;margin:0 auto;}
+.page.active{display:block;animation:rise .25s ease;}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── SHARED ── */
+.sh{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:22px 0 10px;display:flex;align-items:center;gap:8px;}
+.sh::after{content:'';flex:1;height:1px;background:var(--border);}
+.mono{font-family:'JetBrains Mono',monospace;}
+[contenteditable]:focus{outline:none;color:var(--text);}
+[contenteditable]:empty:before{content:attr(data-ph);color:var(--muted);font-style:italic;font-size:11px;}
+button{cursor:pointer;font-family:'Epilogue',sans-serif;}
+
+/* ── DASHBOARD ── */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:20px;}
+.kpi{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 14px;box-shadow:var(--shadow);}
+.kpi-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1;}
+.kpi-lbl{font-size:9px;color:var(--muted);margin-top:4px;font-family:'JetBrains Mono',monospace;letter-spacing:.05em;}
+.kpi-bar{height:3px;border-radius:2px;margin-top:10px;background:var(--border);}
+.kpi-fill{height:100%;border-radius:2px;transition:width .4s;}
+
+.progress-ring-wrap{display:flex;align-items:center;gap:20px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin-bottom:16px;box-shadow:var(--shadow);}
+.ring-svg{flex-shrink:0;}
+.ring-bg{fill:none;stroke:var(--border);stroke-width:6;}
+.ring-prog{fill:none;stroke:var(--green);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .6s ease;transform:rotate(-90deg);transform-origin:50% 50%;}
+.ring-text{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;fill:var(--text);}
+.ring-info h3{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px;}
+.ring-info p{font-size:11px;color:var(--muted);line-height:1.6;}
+.ring-info strong{color:var(--text);}
+
+.phase-progress{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
+.ph-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px 14px;box-shadow:var(--shadow);}
+.ph-name{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;margin-bottom:8px;}
+.disc .ph-name{color:var(--orange);}
+.dev .ph-name{color:var(--blue);}
+.dep .ph-name{color:var(--green);}
+.ph-bar-bg{height:5px;background:var(--border);border-radius:3px;}
+.ph-bar-fill{height:100%;border-radius:3px;}
+.disc .ph-bar-fill{background:var(--orange);}
+.dev .ph-bar-fill{background:var(--blue);}
+.dep .ph-bar-fill{background:var(--green);}
+.ph-pct{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:5px;}
+.ph-edit{font-size:10px;color:var(--muted);outline:none;width:100%;}
+
+.activity-list{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:var(--shadow);}
+.act-item{display:flex;gap:10px;align-items:flex-start;padding:9px 14px;border-bottom:1px solid var(--border);font-size:11px;}
+.act-item:last-child{border-bottom:none;}
+.act-dot{width:7px;height:7px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+.act-msg{flex:1;outline:none;}
+.act-time{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);white-space:nowrap;padding-top:1px;}
+
+/* ── KANBAN ── */
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:start;}
+.col-head{background:var(--surf);border:1px solid var(--border);border-bottom:none;border-radius:7px 7px 0 0;padding:9px 12px;display:flex;align-items:center;gap:8px;}
+.col-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:.03em;}
+.col-count{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 6px;border-radius:10px;background:var(--border);color:var(--muted);}
+.col-dot{width:8px;height:8px;border-radius:50%;}
+.col-body{background:var(--surf);border:1px solid var(--border);border-top:none;border-radius:0 0 7px 7px;padding:8px;min-height:100px;display:flex;flex-direction:column;gap:7px;}
+
+.task{background:#fff;border:1px solid var(--border);border-radius:7px;padding:10px 12px;cursor:grab;transition:border-color .15s,box-shadow .15s,transform .15s;box-shadow:var(--shadow);}
+.task:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.09);}
+.task.dragging{opacity:.4;}
+.task-phase{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.07em;padding:2px 6px;border-radius:3px;display:inline-block;margin-bottom:5px;}
+.task-title{font-size:12px;font-weight:500;line-height:1.35;margin-bottom:7px;outline:none;}
+.task-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.task-assign{font-size:10px;color:var(--muted);outline:none;}
+.task-due{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);padding:2px 5px;border:1px solid var(--border);border-radius:3px;outline:none;}
+.task-prio{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 6px;border-radius:3px;font-weight:600;}
+.prio-high{background:#fde8ed;color:var(--red);}
+.prio-med{background:#fdf3dc;color:var(--yellow);}
+.prio-low{background:#e4f9ef;color:var(--green);}
+
+.add-task-btn{background:none;border:1px dashed var(--border);border-radius:5px;width:100%;padding:7px;font-size:11px;color:var(--muted);transition:all .2s;margin-top:2px;}
+.add-task-btn:hover{border-color:var(--border2);color:var(--text);background:#fff;}
+
+/* ── GANTT ── */
+.gantt-wrap{overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--shadow);}
+.gantt-header-row{display:flex;margin-bottom:8px;}
+.gantt-header-label{width:210px;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+.gantt-weeks{flex:1;display:flex;}
+.gantt-week{flex:1;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);text-align:center;letter-spacing:.03em;line-height:1.4;}
+.gantt-row{display:flex;align-items:center;gap:0;margin-bottom:5px;min-height:32px;}
+.gantt-label{width:210px;flex-shrink:0;font-size:11px;padding-right:14px;color:var(--text);outline:none;}
+.gantt-track{flex:1;background:var(--surf);border:1px solid var(--border);border-radius:4px;position:relative;height:26px;}
+.gantt-bar{position:absolute;top:3px;height:20px;border-radius:3px;display:flex;align-items:center;padding:0 8px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#fff;white-space:nowrap;overflow:hidden;}
+.gantt-today{position:absolute;top:0;bottom:0;width:2px;background:var(--orange);opacity:.6;z-index:2;border-radius:1px;}
+.gantt-phase-label{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.05em;margin:10px 0 5px 210px;}
+
+/* ── EQUIPO ── */
+.team-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
+.member{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--shadow);transition:border-color .2s;}
+.member:hover{border-color:var(--border2);}
+.member-top{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;}
+.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;flex-shrink:0;}
+.member-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;outline:none;display:block;}
+.member-role{font-size:10px;color:var(--muted);outline:none;display:block;margin-top:2px;}
+.member-tasks{margin-top:8px;}
+.mt-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.06em;margin-bottom:5px;text-transform:uppercase;}
+.mt-item{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px;outline:none;}
+.mt-item:last-child{border-bottom:none;}
+.mt-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.member-load{margin-top:12px;}
+.load-bar-bg{height:4px;background:var(--border);border-radius:2px;margin-top:5px;}
+.load-bar-fill{height:100%;border-radius:2px;background:var(--green);transition:width .3s;}
+.load-pct{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;}
+.add-member-btn{background:none;border:1px dashed var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;color:var(--muted);font-size:12px;transition:all .2s;cursor:pointer;width:100%;}
+.add-member-btn:hover{border-color:var(--border2);color:var(--text);background:var(--surf);}
+
+/* ── RIESGOS ── */
+.risk-table{width:100%;border-collapse:collapse;}
+.risk-table th{background:var(--surf);border:1px solid var(--border);padding:9px 12px;text-align:left;font-family:'Syne',sans-serif;font-size:10px;letter-spacing:.05em;color:var(--muted);font-weight:700;}
+.risk-table td{border:1px solid var(--border);padding:9px 12px;font-size:11px;vertical-align:top;background:#fff;}
+.risk-table tr:nth-child(even) td{background:var(--surf);}
+.risk-table tr:hover td{background:#f5f5fa;}
+.risk-heat{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 7px;border-radius:3px;font-weight:600;}
+.heat-high{background:#fde8ed;color:var(--red);}
+.heat-med{background:#fdf3dc;color:var(--yellow);}
+.heat-low{background:#e4f9ef;color:var(--green);}
+td[contenteditable]:focus{background:#fafafa;outline:none;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;width:400px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,.12);}
+.modal h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:18px;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.07em;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+.field input,.field select,.field textarea{width:100%;background:var(--surf);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-family:'Epilogue',sans-serif;font-size:12px;outline:none;transition:border-color .2s;}
+.field input:focus,.field select:focus{border-color:var(--border2);background:#fff;}
+.field select option{background:#fff;}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
+.btn-cancel{background:none;border:1px solid var(--border);color:var(--muted);padding:8px 16px;border-radius:6px;font-size:11px;transition:all .2s;}
+.btn-cancel:hover{color:var(--text);border-color:var(--border2);}
+.btn-save{background:var(--orange);border:none;color:#fff;padding:8px 16px;border-radius:6px;font-size:11px;font-weight:600;transition:opacity .2s;}
+.btn-save:hover{opacity:.88;}
+
+/* MEMBER MODAL */
+.member-modal{background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;width:360px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,.12);}
+
+/* PHASE SETTINGS */
+.phase-config{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow);}
+.phase-config-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.phase-badge{font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;border-radius:3px;font-weight:600;}
+.cfg-field{display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center;margin-bottom:8px;}
+.cfg-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
+.cfg-val{font-size:12px;outline:none;border-bottom:1px dashed var(--border);padding:2px 4px;}
+.cfg-val:focus{border-bottom-color:var(--border2);}
+
+/* FAB */
+.fab{position:fixed;bottom:24px;right:24px;background:var(--orange);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:22px;box-shadow:0 4px 16px rgba(217,95,43,.35);transition:transform .2s,box-shadow .2s;z-index:200;}
+.fab:hover{transform:scale(1.1);box-shadow:0 6px 22px rgba(217,95,43,.45);}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:32px;color:var(--muted);font-size:12px;}
+.empty-icon{font-size:28px;margin-bottom:8px;}
+
+@media(max-width:700px){
+  .kanban{grid-template-columns:1fr 1fr;}
+  .phase-progress{grid-template-columns:1fr;}
+  .kpi-row{grid-template-columns:repeat(2,1fr);}
+  .gantt-label{width:130px;}
+  .gantt-header-label{width:130px;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="brand">⚡ PM · IA</div>
+  <div class="tabs">
+    <button class="tab active" onclick="show('p-dash',this)">Dashboard</button>
+    <button class="tab" onclick="show('p-kanban',this)">Kanban</button>
+    <button class="tab" onclick="show('p-gantt',this)">Cronograma</button>
+    <button class="tab" onclick="show('p-team',this)">Equipo</button>
+    <button class="tab" onclick="show('p-risks',this)">Riesgos</button>
+    <button class="tab" onclick="show('p-config',this)">⚙ Config</button>
+  </div>
+  <div class="topbar-end">
+    <div class="proj-name" contenteditable="true" data-ph="Nombre del proyecto...">Nuevo Proyecto de Automatización</div>
+  </div>
+</div>
+
+
+<!-- ══════════ DASHBOARD ══════════ -->
+<div id="p-dash" class="page active">
+
+  <div class="progress-ring-wrap">
+    <svg class="ring-svg" width="72" height="72" viewBox="0 0 72 72">
+      <circle class="ring-bg" cx="36" cy="36" r="28"/>
+      <circle class="ring-prog" id="mainRing" cx="36" cy="36" r="28" stroke-dasharray="175.9" stroke-dashoffset="175.9"/>
+    </svg>
+    <div class="ring-info">
+      <h3>Progreso General — <span style="color:var(--green)" id="pctLabel">0%</span></h3>
+      <p>
+        Fase activa: <strong id="dashPhase">Discovery</strong> &nbsp;·&nbsp;
+        Semana <span id="dashWeek" contenteditable="true">1</span> de <span id="dashTotalWeeks" contenteditable="true">8</span><br>
+        Próximo hito: <span id="dashMilestone" contenteditable="true" data-ph="Define un hito...">—</span>
+        &nbsp;·&nbsp; <span id="dashMilestoneDate" contenteditable="true" data-ph="fecha">—</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-val" style="color:var(--text)" id="kpiTotal">0</div>
+      <div class="kpi-lbl">TAREAS TOTALES</div>
+      <div class="kpi-bar"><div class="kpi-fill" style="width:100%;background:var(--border)"></div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val" style="color:var(--green)" id="kpiDone">0</div>
+      <div class="kpi-lbl">COMPLETADAS</div>
+      <div class="kpi-bar"><div class="kpi-fill" id="fillDone" style="background:var(--green);width:0%"></div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val" style="color:var(--blue)" id="kpiProg">0</div>
+      <div class="kpi-lbl">EN PROGRESO</div>
+      <div class="kpi-bar"><div class="kpi-fill" id="fillProg" style="background:var(--blue);width:0%"></div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val" style="color:var(--red)" id="kpiBlock">0</div>
+      <div class="kpi-lbl">BLOQUEADAS</div>
+      <div class="kpi-bar"><div class="kpi-fill" id="fillBlock" style="background:var(--red);width:0%"></div></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val" style="color:var(--muted)" id="kpiPend">0</div>
+      <div class="kpi-lbl">PENDIENTES</div>
+      <div class="kpi-bar"><div class="kpi-fill" id="fillPend" style="background:var(--muted);width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="sh">Avance por Fase</div>
+  <div class="phase-progress">
+    <div class="ph-card disc">
+      <div class="ph-name" id="phName1">Fase 1 · Discovery</div>
+      <div class="ph-bar-bg"><div class="ph-bar-fill disc" id="phBar1" style="width:0%"></div></div>
+      <div class="ph-pct" id="phPct1">0%</div>
+    </div>
+    <div class="ph-card dev">
+      <div class="ph-name" id="phName2">Fase 2 · Development</div>
+      <div class="ph-bar-bg"><div class="ph-bar-fill dev" id="phBar2" style="width:0%"></div></div>
+      <div class="ph-pct" id="phPct2">0%</div>
+    </div>
+    <div class="ph-card dep">
+      <div class="ph-name" id="phName3">Fase 3 · Deployment</div>
+      <div class="ph-bar-bg"><div class="ph-bar-fill dep" id="phBar3" style="width:0%"></div></div>
+      <div class="ph-pct" id="phPct3">0%</div>
+    </div>
+  </div>
+
+  <div class="sh">Actividad Reciente</div>
+  <div class="activity-list" id="activityLog">
+    <div class="act-item">
+      <div class="act-dot" style="background:var(--muted)"></div>
+      <div class="act-msg" contenteditable="true">Proyecto creado. Agrega tareas en el Kanban para comenzar.</div>
+      <div class="act-time">Ahora</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════ KANBAN ══════════ -->
+<div id="p-kanban" class="page">
+
+  <div class="kanban" id="kanbanBoard">
+    <div>
+      <div class="col-head"><div class="col-dot" style="background:var(--muted)"></div><div class="col-title">Pendiente</div><div class="col-count" id="cnt-pending">0</div></div>
+      <div class="col-body" id="col-pending" ondragover="event.preventDefault()" ondrop="drop(event,'pending')">
+        <div class="empty-state"><div class="empty-icon">📋</div>Sin tareas aún</div>
+        <button class="add-task-btn" onclick="openModal('pending')">+ Agregar tarea</button>
+      </div>
+    </div>
+    <div>
+      <div class="col-head"><div class="col-dot" style="background:var(--blue)"></div><div class="col-title">En Progreso</div><div class="col-count" id="cnt-progress">0</div></div>
+      <div class="col-body" id="col-progress" ondragover="event.preventDefault()" ondrop="drop(event,'progress')">
+        <div class="empty-state"><div class="empty-icon">🔨</div>Sin tareas activas</div>
+        <button class="add-task-btn" onclick="openModal('progress')">+ Agregar tarea</button>
+      </div>
+    </div>
+    <div>
+      <div class="col-head"><div class="col-dot" style="background:var(--red)"></div><div class="col-title">Bloqueado</div><div class="col-count" id="cnt-blocked">0</div></div>
+      <div class="col-body" id="col-blocked" ondragover="event.preventDefault()" ondrop="drop(event,'blocked')">
+        <div class="empty-state"><div class="empty-icon">🚧</div>Sin bloqueos</div>
+        <button class="add-task-btn" onclick="openModal('blocked')">+ Agregar tarea</button>
+      </div>
+    </div>
+    <div>
+      <div class="col-head"><div class="col-dot" style="background:var(--green)"></div><div class="col-title">Completado</div><div class="col-count" id="cnt-done">0</div></div>
+      <div class="col-body" id="col-done" style="background:var(--done-bg);border-color:var(--done-border)" ondragover="event.preventDefault()" ondrop="drop(event,'done')">
+        <div class="empty-state"><div class="empty-icon">✅</div>Nada completado aún</div>
+        <button class="add-task-btn" onclick="openModal('done')">+ Agregar tarea</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════ CRONOGRAMA ══════════ -->
+<div id="p-gantt" class="page">
+  <div class="sh">Cronograma de Fases — editable</div>
+  <div class="gantt-wrap">
+    <div style="min-width:600px;">
+
+      <div class="gantt-header-row">
+        <div class="gantt-header-label">Actividad</div>
+        <div class="gantt-weeks" id="weekHeaders">
+          <div class="gantt-week">S1</div>
+          <div class="gantt-week">S2</div>
+          <div class="gantt-week">S3</div>
+          <div class="gantt-week">S4</div>
+          <div class="gantt-week">S5</div>
+          <div class="gantt-week">S6</div>
+          <div class="gantt-week">S7</div>
+          <div class="gantt-week">S8</div>
+        </div>
+      </div>
+
+      <div id="ganttRows">
+
+        <div class="gantt-phase-label" style="color:var(--orange)">Fase 1</div>
+        <div class="gantt-row">
+          <div class="gantt-label" contenteditable="true" data-ph="Actividad...">Definición de caso de uso</div>
+          <div class="gantt-track">
+            <div class="gantt-bar" style="left:0%;width:25%;background:var(--orange)">S1–S2</div>
+            <div class="gantt-today" id="todayLine" style="left:37.5%"></div>
+          </div>
+        </div>
+        <div class="gantt-row">
+          <div class="gantt-label" contenteditable="true">Análisis de contexto y usuarios</div>
+          <div class="gantt-track">
+            <div class="gantt-bar" style="left:12.5%;width:25%;background:var(--orange)">S2–S3</div>
+          </div>
+        </div>
+        <div class="gantt-row">
+          <div class="gantt-label" contenteditable="true">Selección de arquitectura</div>
+          <div class="gantt-track">
+            <div class="gantt-bar" style="left:25%;width:12.5%;background:var(--orange)">S3</div>
+          </div>
+        </div>
+
+        <div class="gantt-phase-label" style="color:var(--blue)">Fase 2</div>
+        <div class="gantt-row">
+          <div class="gantt-label" contenteditable="true">Pipeline de datos</div>
+          <div class="gantt-track">
+            <div class="gantt-bar" style="left:37.5%;width:12.5%;background:var(--blue)">S4</div>
+          </div>
+        </div>
+        <div class="gantt-row">
+          <div class="gantt-label" contenteditable="true">Construcción del modelo / bot</div>
+          <div class="gantt-track">
+            <div class="gantt-bar" style="left:37.5%;width:25%;background:var(--blue);opacity:.6">S4–S5</div>
+          </div>
+        </div>
+        <div class="gantt-row">
+          <div class="gantt-label" contenteditable="true">Evaluación e iteración</div>
+          <div class="gantt-track">
+            <div class="gantt-bar" style="left:50%;width:12.5%;background:var(--blue);opacity:.4">S5</div>
+          </div>
+        </div>
+        <div class="gantt-row">
+          <div class="gantt-label" contenteditable="true">⭐ Demo MVP</div>
+          <div class="gantt-track">
+            <div class="gantt-bar" style="left:62.5%;width:12.5%;background:var(--yellow)">S6 · hito</div>
+          </div>
+        </div>
+
+        <div class="gantt-phase-label" style="color:var(--green)">Fase 3</div>
+        <div class="gantt-row">
+          <div class="gantt-label" contenteditable="true">Plan de despliegue</div>
+          <div class="gantt-track">
+            <div class="gantt-bar" style="left:75%;width:12.5%;background:var(--green);opacity:.4">S7</div>
+          </div>
+        </div>
+        <div class="gantt-row">
+          <div class="gantt-label" contenteditable="true">Go-live + monitoreo</div>
+          <div class="gantt-track">
+            <div class="gantt-bar" style="left:87.5%;width:12.5%;background:var(--green);opacity:.4">S8</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:10px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;display:flex;gap:16px;flex-wrap:wrap;">
+        <span>▏ línea naranja = semana actual</span>
+        <span>⭐ hito clave</span>
+        <span style="color:var(--blue)">■ en curso</span>
+        <span style="color:var(--green)">■ completado</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+    <button onclick="addGanttRow()" style="background:none;border:1px dashed var(--border);color:var(--muted);padding:7px 14px;border-radius:6px;font-size:11px;transition:all .2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">+ Agregar fila</button>
+  </div>
+</div>
+
+
+<!-- ══════════ EQUIPO ══════════ -->
+<div id="p-team" class="page">
+  <div class="sh">Miembros del Equipo</div>
+  <div class="team-grid" id="teamGrid">
+
+    <button class="add-member-btn" onclick="openMemberModal()">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">+</div>
+      <div style="text-align:left;">
+        <div style="font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--text);">Agregar miembro</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">Haz clic para añadir</div>
+      </div>
+    </button>
+
+  </div>
+</div>
+
+
+<!-- ══════════ RIESGOS ══════════ -->
+<div id="p-risks" class="page">
+  <div class="sh">Registro de Riesgos</div>
+  <table class="risk-table" id="riskTable">
+    <thead>
+      <tr>
+        <th style="width:5%">#</th>
+        <th style="width:22%">Riesgo</th>
+        <th style="width:13%">Fase</th>
+        <th style="width:9%">Impacto</th>
+        <th style="width:24%">Plan de mitigación</th>
+        <th style="width:14%">Responsable</th>
+        <th style="width:13%">Estado</th>
+      </tr>
+    </thead>
+    <tbody id="riskBody">
+      <tr id="emptyRisk">
+        <td colspan="7" style="text-align:center;padding:28px;color:var(--muted);font-size:12px;">
+          Sin riesgos registrados. Haz clic en "+ Agregar riesgo" para comenzar.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <button onclick="addRisk()" style="margin-top:10px;background:none;border:1px dashed var(--border);color:var(--muted);padding:8px 16px;border-radius:6px;font-size:11px;transition:all .2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">+ Agregar riesgo</button>
+</div>
+
+
+<!-- ══════════ CONFIG ══════════ -->
+<div id="p-config" class="page">
+  <div class="sh">Configuración del Proyecto</div>
+
+  <div class="phase-config">
+    <div class="phase-config-head">
+      <span class="phase-badge" style="background:#fde8de;color:var(--orange)">FASE 1</span>
+      <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;">Discovery</span>
+    </div>
+    <div class="cfg-field"><div class="cfg-label">Nombre</div><div class="cfg-val" contenteditable="true" id="cfgP1Name">Discovery · Entendimiento del Problema</div></div>
+    <div class="cfg-field"><div class="cfg-label">Duración</div><div class="cfg-val" contenteditable="true">2–3 semanas</div></div>
+    <div class="cfg-field"><div class="cfg-label">Entregable clave</div><div class="cfg-val" contenteditable="true">Documento de caso de uso + arquitectura aprobada</div></div>
+  </div>
+
+  <div class="phase-config">
+    <div class="phase-config-head">
+      <span class="phase-badge" style="background:#dceeff;color:var(--blue)">FASE 2</span>
+      <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;">Development</span>
+    </div>
+    <div class="cfg-field"><div class="cfg-label">Nombre</div><div class="cfg-val" contenteditable="true" id="cfgP2Name">Development · Construcción</div></div>
+    <div class="cfg-field"><div class="cfg-label">Duración</div><div class="cfg-val" contenteditable="true">3–4 semanas</div></div>
+    <div class="cfg-field"><div class="cfg-label">Entregable clave</div><div class="cfg-val" contenteditable="true">MVP funcional demostrado ante stakeholders</div></div>
+  </div>
+
+  <div class="phase-config">
+    <div class="phase-config-head">
+      <span class="phase-badge" style="background:#d7f7eb;color:var(--green)">FASE 3</span>
+      <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;">Deployment</span>
+    </div>
+    <div class="cfg-field"><div class="cfg-label">Nombre</div><div class="cfg-val" contenteditable="true" id="cfgP3Name">Deployment · Operacionalización</div></div>
+    <div class="cfg-field"><div class="cfg-label">Duración</div><div class="cfg-val" contenteditable="true">2 semanas</div></div>
+    <div class="cfg-field"><div class="cfg-label">Entregable clave</div><div class="cfg-val" contenteditable="true">Sistema en producción + dashboard de monitoreo activo</div></div>
+  </div>
+
+  <div class="sh" style="margin-top:24px;">Prioridades del Proyecto</div>
+  <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--shadow);">
+    <div class="cfg-field"><div class="cfg-label">Objetivo principal</div><div class="cfg-val" contenteditable="true" data-ph="Define el objetivo...">Automatizar proceso X para reducir tiempo/costo/error</div></div>
+    <div class="cfg-field"><div class="cfg-label">KPI de éxito</div><div class="cfg-val" contenteditable="true" data-ph="Métrica clave...">Reducción de tiempo en un 80% en las primeras 4 semanas</div></div>
+    <div class="cfg-field"><div class="cfg-label">Presupuesto</div><div class="cfg-val" contenteditable="true" data-ph="Presupuesto estimado...">Por definir</div></div>
+    <div class="cfg-field"><div class="cfg-label">Restricción crítica</div><div class="cfg-val" contenteditable="true" data-ph="Restricción...">Por definir</div></div>
+  </div>
+</div>
+
+
+<!-- MODAL NUEVA TAREA -->
+<div class="modal-overlay" id="taskModal">
+  <div class="modal">
+    <h3>Nueva Tarea</h3>
+    <div class="field"><label>Título de la tarea</label><input type="text" id="mTitle" placeholder="Describe la tarea..."></div>
+    <div class="field"><label>Fase</label>
+      <select id="mPhase">
+        <option value="F1">Fase 1 · Discovery</option>
+        <option value="F2" selected>Fase 2 · Development</option>
+        <option value="F3">Fase 3 · Deployment</option>
+      </select>
+    </div>
+    <div class="field"><label>Asignado a</label><input type="text" id="mAssign" placeholder="Nombre o rol..."></div>
+    <div class="field"><label>Fecha límite</label><input type="text" id="mDue" placeholder="Ej: 15 Jun"></div>
+    <div class="field"><label>Prioridad</label>
+      <select id="mPrio">
+        <option value="HIGH">Alta</option>
+        <option value="MED" selected>Media</option>
+        <option value="LOW">Baja</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveTask()">Guardar tarea</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NUEVO MIEMBRO -->
+<div class="modal-overlay" id="memberModal">
+  <div class="member-modal">
+    <h3>Nuevo Miembro</h3>
+    <div class="field"><label>Nombre</label><input type="text" id="mmName" placeholder="Nombre completo..."></div>
+    <div class="field"><label>Rol / Responsabilidad</label><input type="text" id="mmRole" placeholder="Ej: Desarrollador IA, Analista, PM..."></div>
+    <div class="field"><label>Iniciales (para avatar)</label><input type="text" id="mmInitials" maxlength="2" placeholder="Ej: GM"></div>
+    <div class="field"><label>Color del avatar</label>
+      <select id="mmColor">
+        <option value="orange">Naranja</option>
+        <option value="blue">Azul</option>
+        <option value="green">Verde</option>
+        <option value="purple">Morado</option>
+        <option value="red">Rojo</option>
+      </select>
+    </div>
+    <div class="field"><label>Carga de trabajo (%)</label><input type="number" id="mmLoad" min="0" max="100" value="50"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeMemberModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveMember()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<button class="fab" onclick="openModal('progress')" title="Nueva tarea">+</button>
+
+<script>
+// ── TABS ──
+function show(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── DRAG & DROP ──
+let dragId=null;
+function drag(ev){dragId=ev.target.closest('.task').id;}
+function drop(ev,col){
+  ev.preventDefault();
+  if(!dragId)return;
+  const t=document.getElementById(dragId);
+  if(!t)return;
+  const colEl=document.getElementById('col-'+col);
+  const addBtn=colEl.querySelector('.add-task-btn');
+  const empty=colEl.querySelector('.empty-state');
+  if(empty)empty.remove();
+  colEl.insertBefore(t,addBtn);
+  if(col==='done'){t.style.opacity='.65';t.style.borderColor='var(--done-border)';}
+  else{t.style.opacity='1';t.style.borderColor='var(--border)';}
+  updateCounts();
+  addActivity(`Tarea "${t.querySelector('.task-title').textContent.trim()}" → ${col}`);
+  dragId=null;
+}
+
+// ── COUNTS & KPIs ──
+function updateCounts(){
+  const cols=['pending','progress','blocked','done'];
+  cols.forEach(c=>{
+    const tasks=document.querySelectorAll('#col-'+c+' .task');
+    document.getElementById('cnt-'+c).textContent=tasks.length;
+  });
+  const done=document.querySelectorAll('#col-done .task').length;
+  const total=document.querySelectorAll('.task').length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('pctLabel').textContent=pct+'%';
+  const offset=175.9*(1-pct/100);
+  document.getElementById('mainRing').style.strokeDashoffset=offset;
+  document.getElementById('kpiTotal').textContent=total;
+  document.getElementById('kpiDone').textContent=done;
+  const prog=document.querySelectorAll('#col-progress .task').length;
+  const block=document.querySelectorAll('#col-blocked .task').length;
+  const pend=document.querySelectorAll('#col-pending .task').length;
+  document.getElementById('kpiProg').textContent=prog;
+  document.getElementById('kpiBlock').textContent=block;
+  document.getElementById('kpiPend').textContent=pend;
+  const w=n=>total?Math.round(n/total*100)+'%':'0%';
+  document.getElementById('fillDone').style.width=w(done);
+  document.getElementById('fillProg').style.width=w(prog);
+  document.getElementById('fillBlock').style.width=w(block);
+  document.getElementById('fillPend').style.width=w(pend);
+
+  // phase bars based on task phases
+  ['F1','F2','F3'].forEach((ph,i)=>{
+    const all=document.querySelectorAll(`.task[data-phase="${ph}"]`).length;
+    const doneP=document.querySelectorAll(`#col-done .task[data-phase="${ph}"]`).length;
+    const p=all?Math.round(doneP/all*100):0;
+    const bars=['ph-bar-fill disc','ph-bar-fill dev','ph-bar-fill dep'];
+    document.querySelectorAll('.ph-bar-fill')[i].style.width=p+'%';
+    document.querySelectorAll('.ph-pct')[i].textContent=p+'% · '+doneP+'/'+all+' tareas';
+  });
+}
+
+// ── TASK MODAL ──
+let modalCol='progress';
+function openModal(col){
+  modalCol=col;
+  document.getElementById('taskModal').classList.add('open');
+  setTimeout(()=>document.getElementById('mTitle').focus(),100);
+}
+function closeModal(){
+  document.getElementById('taskModal').classList.remove('open');
+  document.getElementById('mTitle').value='';
+  document.getElementById('mAssign').value='';
+  document.getElementById('mDue').value='';
+}
+function saveTask(){
+  const title=document.getElementById('mTitle').value.trim();
+  if(!title)return;
+  const phase=document.getElementById('mPhase').value;
+  const assign=document.getElementById('mAssign').value||'— sin asignar';
+  const due=document.getElementById('mDue').value||'—';
+  const prio=document.getElementById('mPrio').value;
+  const phColors={F1:['rgba(217,95,43,.12)','var(--orange)'],F2:['rgba(43,111,217,.12)','var(--blue)'],F3:['rgba(29,184,122,.12)','var(--green)']};
+  const phLabel={F1:'F1',F2:'F2',F3:'F3'};
+  const prioClass={HIGH:'prio-high',MED:'prio-med',LOW:'prio-low'};
+  const id='t'+Date.now();
+  const div=document.createElement('div');
+  div.className='task'; div.draggable=true; div.id=id;
+  div.setAttribute('data-phase',phase);
+  div.setAttribute('ondragstart','drag(event)');
+  div.innerHTML=`
+    <span class="task-phase mono" style="background:${phColors[phase][0]};color:${phColors[phase][1]}">${phLabel[phase]}</span>
+    <div class="task-title" contenteditable="true">${title}</div>
+    <div class="task-meta">
+      <span class="task-assign" contenteditable="true">👤 ${assign}</span>
+      <span class="task-due" contenteditable="true">${due}</span>
+      <span class="task-prio ${prioClass[prio]}">${prio}</span>
+      <button onclick="deleteTask('${id}')" style="margin-left:auto;background:none;border:none;color:var(--muted);font-size:13px;padding:0 2px;line-height:1;" title="Eliminar">×</button>
+    </div>`;
+  const colEl=document.getElementById('col-'+modalCol);
+  const empty=colEl.querySelector('.empty-state');
+  if(empty)empty.remove();
+  colEl.insertBefore(div,colEl.querySelector('.add-task-btn'));
+  updateCounts();
+  addActivity(`Nueva tarea creada: "${title}"`);
+  closeModal();
+}
+function deleteTask(id){
+  const t=document.getElementById(id);
+  if(t&&confirm('¿Eliminar esta tarea?')){t.remove();updateCounts();}
+}
+
+// ── ACTIVITY ──
+function addActivity(msg){
+  const log=document.getElementById('activityLog');
+  const item=document.createElement('div');
+  item.className='act-item';
+  const now=new Date();
+  const time=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  item.innerHTML=`<div class="act-dot" style="background:var(--blue)"></div><div class="act-msg">${msg}</div><div class="act-time">${time}</div>`;
+  log.insertBefore(item,log.firstChild);
+  if(log.children.length>8)log.removeChild(log.lastChild);
+}
+
+// ── GANTT ADD ROW ──
+let ganttPhase='var(--orange)';
+function addGanttRow(){
+  const rows=document.getElementById('ganttRows');
+  const row=document.createElement('div');
+  row.className='gantt-row';
+  row.innerHTML=`
+    <div class="gantt-label" contenteditable="true" data-ph="Nueva actividad..."></div>
+    <div class="gantt-track">
+      <div class="gantt-bar" contenteditable="true" style="left:0%;width:12.5%;background:var(--muted)">S1</div>
+    </div>`;
+  rows.appendChild(row);
+}
+
+// ── MEMBER MODAL ──
+const avatarColors={
+  orange:'rgba(217,95,43,.15)',
+  blue:'rgba(43,111,217,.15)',
+  green:'rgba(29,184,122,.15)',
+  purple:'rgba(124,58,232,.15)',
+  red:'rgba(217,43,74,.15)'
+};
+const avatarText={orange:'var(--orange)',blue:'var(--blue)',green:'var(--green)',purple:'var(--purple)',red:'var(--red)'};
+function openMemberModal(){document.getElementById('memberModal').classList.add('open');setTimeout(()=>document.getElementById('mmName').focus(),100);}
+function closeMemberModal(){document.getElementById('memberModal').classList.remove('open');}
+function saveMember(){
+  const name=document.getElementById('mmName').value.trim();
+  if(!name)return;
+  const role=document.getElementById('mmRole').value||'Miembro del equipo';
+  const initials=document.getElementById('mmInitials').value.trim().toUpperCase()||name.slice(0,2).toUpperCase();
+  const color=document.getElementById('mmColor').value;
+  const load=parseInt(document.getElementById('mmLoad').value)||50;
+  const loadColor=load>75?'var(--red)':load>50?'var(--yellow)':'var(--green)';
+  const grid=document.getElementById('teamGrid');
+  const addBtn=grid.querySelector('.add-member-btn');
+  const card=document.createElement('div');
+  card.className='member';
+  card.innerHTML=`
+    <div class="member-top">
+      <div class="avatar" style="background:${avatarColors[color]};color:${avatarText[color]}">${initials}</div>
+      <div>
+        <span class="member-name" contenteditable="true">${name}</span>
+        <span class="member-role" contenteditable="true">${role}</span>
+      </div>
+    </div>
+    <div class="member-tasks">
+      <div class="mt-label">TAREAS</div>
+      <div class="mt-item" contenteditable="true" data-ph="Agregar tarea asignada..."></div>
+    </div>
+    <div class="member-load">
+      <div class="mt-label">CARGA — ${load}%</div>
+      <div class="load-bar-bg"><div class="load-bar-fill" style="width:${load}%;background:${loadColor}"></div></div>
+    </div>`;
+  grid.insertBefore(card,addBtn);
+  closeMemberModal();
+  document.getElementById('mmName').value='';
+  document.getElementById('mmRole').value='';
+  document.getElementById('mmInitials').value='';
+  document.getElementById('mmLoad').value='50';
+}
+
+// ── RISKS ──
+let riskCount=0;
+function addRisk(){
+  riskCount++;
+  const empty=document.getElementById('emptyRisk');
+  if(empty)empty.remove();
+  const tbody=document.getElementById('riskBody');
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td class="mono" style="color:var(--muted)">R${String(riskCount).padStart(2,'0')}</td>
+    <td contenteditable="true" data-ph="Descripción del riesgo..."></td>
+    <td contenteditable="true" data-ph="Fase afectada..."></td>
+    <td><span class="risk-heat heat-med" contenteditable="true">MEDIO</span></td>
+    <td contenteditable="true" data-ph="Plan de mitigación..."></td>
+    <td contenteditable="true" data-ph="Responsable..."></td>
+    <td><span class="risk-heat heat-low" contenteditable="true">NUEVO</span></td>`;
+  tbody.appendChild(tr);
+  tr.querySelector('[contenteditable]').focus();
+}
+
+// ── CLOSE MODALS ON BACKDROP ──
+['taskModal','memberModal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this){closeModal();closeMemberModal();}});
+});
+
+// ── KEYBOARD: Enter en modales guarda ──
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeModal();closeMemberModal();}
+});
+
+// init
+updateCounts();
+</script>
+</body>
+</html>

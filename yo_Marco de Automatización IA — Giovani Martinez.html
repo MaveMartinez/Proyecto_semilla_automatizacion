@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<!-- saved from url=(0061)file:///C:/Users/Giovani/Desktop/marco_automatizacion_ia.html -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marco de Automatización IA — Giovani Martinez</title>
+<link href="./Marco de Automatización IA — Giovani Martinez_files/css2" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f11;
+  --surface: #161619;
+  --surface2: #1d1d21;
+  --border: #2a2a30;
+  --text: #e8e6e1;
+  --muted: #6b6b78;
+  --accent: #e8633a;
+  --accent2: #3a8fe8;
+  --accent3: #3ae8a0;
+  --accent4: #e8c43a;
+  --tag-bg: #1e1e24;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Epilogue', sans-serif;
+  font-size: 13px;
+  min-height: 100vh;
+}
+
+/* TOP BAR */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 44px;
+  position: sticky; top: 0; z-index: 200;
+}
+.topbar-brand {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  color: var(--accent);
+  margin-right: 24px;
+  white-space: nowrap;
+}
+.topbar-tabs {
+  display: flex;
+  gap: 0;
+  height: 100%;
+  flex: 1;
+  overflow-x: auto;
+}
+.topbar-tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 0 16px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  height: 100%;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all .2s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 2px;
+  letter-spacing: .06em;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* PAGES */
+.page { display: none; padding: 28px 24px; max-width: 960px; margin: 0 auto; }
+.page.active { display: block; animation: rise .3s ease; }
+@keyframes rise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+/* ── CANVAS EDITABLE ── */
+.canvas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.canvas-title-area { flex: 1; min-width: 220px; }
+.canvas-title-area h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.canvas-title-area p {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.context-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+  margin-bottom: 28px;
+}
+.ctx-field {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.ctx-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.ctx-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  outline: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  resize: none;
+  font-family: 'Epilogue', sans-serif;
+}
+.ctx-value[contenteditable]:focus {
+  color: var(--accent);
+}
+
+/* MODULE SECTIONS */
+.module {
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.module-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s;
+}
+.module-header:hover { background: var(--surface2); }
+.module-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--muted);
+  width: 24px;
+}
+.module-icon {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.module-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  flex: 1;
+}
+.module-subtitle {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+}
+.module-toggle {
+  font-size: 11px;
+  color: var(--muted);
+  transition: transform .2s;
+}
+.module.collapsed .module-toggle { transform: rotate(-90deg); }
+
+.module-body {
+  padding: 16px;
+  background: var(--bg);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+.module.collapsed .module-body { display: none; }
+
+.block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  border-left: 3px solid transparent;
+  transition: border-color .2s;
+}
+.block:hover { border-left-color: var(--accent); }
+
+.block-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.block-content {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+  outline: none;
+  min-height: 36px;
+}
+.block-content[contenteditable]:focus {
+  color: #fff;
+}
+.block-content[contenteditable]:empty:before {
+  content: attr(data-placeholder);
+  color: var(--muted);
+  font-style: italic;
+}
+.block-tags {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.btag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: var(--tag-bg);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+/* COLOR VARIANTS */
+.mod-orange .module-icon { background: rgba(232,99,58,.15); color: var(--accent); }
+.mod-blue .module-icon { background: rgba(58,143,232,.15); color: var(--accent2); }
+.mod-green .module-icon { background: rgba(58,232,160,.15); color: var(--accent3); }
+.mod-yellow .module-icon { background: rgba(232,196,58,.15); color: var(--accent4); }
+.mod-orange .module-title { color: var(--accent); }
+.mod-blue .module-title { color: var(--accent2); }
+.mod-green .module-title { color: var(--accent3); }
+.mod-yellow .module-title { color: var(--accent4); }
+.mod-orange .block:hover { border-left-color: var(--accent); }
+.mod-blue .block:hover { border-left-color: var(--accent2); }
+.mod-green .block:hover { border-left-color: var(--accent3); }
+.mod-yellow .block:hover { border-left-color: var(--accent4); }
+
+/* ROI METER */
+.roi-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.roi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+}
+.roi-card .roi-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  outline: none;
+}
+.roi-card .roi-unit {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .06em;
+  margin-bottom: 4px;
+}
+.roi-card .roi-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+.roi-orange { color: var(--accent); }
+.roi-blue { color: var(--accent2); }
+.roi-green { color: var(--accent3); }
+
+/* STACK DIAGRAM */
+.stack-flow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+.stack-node {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  outline: none;
+  min-width: 80px;
+  text-align: center;
+}
+.stack-node[contenteditable]:focus { border-color: var(--accent); color: var(--accent); }
+.stack-arrow {
+  color: var(--muted);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.stack-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* PHASES TIMELINE */
+.timeline {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.phase-col {
+  flex: 1;
+  padding: 14px;
+  border-right: 1px solid var(--border);
+}
+.phase-col:last-child { border-right: none; }
+.phase-col.disc { background: rgba(232,99,58,.05); }
+.phase-col.dev { background: rgba(58,143,232,.05); }
+.phase-col.dep { background: rgba(58,232,160,.05); }
+.phase-col-head {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  margin-bottom: 10px;
+}
+.disc .phase-col-head { color: var(--accent); }
+.dev .phase-col-head { color: var(--accent2); }
+.dep .phase-col-head { color: var(--accent3); }
+.phase-step {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+}
+.phase-step .ps-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  background: var(--tag-bg);
+  padding: 1px 4px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.disc .phase-step .ps-num { color: var(--accent); }
+.dev .phase-step .ps-num { color: var(--accent2); }
+.dep .phase-step .ps-num { color: var(--accent3); }
+
+/* ── BIBLIOTECA ── */
+.lib-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.lib-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+  overflow: hidden;
+}
+.lib-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.lib-card.lc-orange::before { background: var(--accent); }
+.lib-card.lc-blue::before { background: var(--accent2); }
+.lib-card.lc-green::before { background: var(--accent3); }
+.lib-card.lc-yellow::before { background: var(--accent4); }
+.lib-card:hover { border-color: #444; transform: translateY(-2px); }
+.lib-card-icon { font-size: 22px; margin-bottom: 8px; }
+.lib-card-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+.lib-card-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.lib-card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.lib-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: var(--tag-bg);
+  color: var(--muted);
+}
+.use-btn {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.lib-card:hover .use-btn { opacity: 1; }
+
+.section-head {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 20px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-head::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* PRINT */
+@media print {
+  body { background: #fff; color: #000; }
+  .topbar { display: none; }
+  .page { display: block !important; }
+  .module-body { display: grid !important; }
+}
+@media (max-width: 600px) {
+  .roi-row { grid-template-columns: 1fr; }
+  .timeline { flex-direction: column; }
+  .phase-col { border-right: none; border-bottom: 1px solid var(--border); }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">⚡ AUTOMACIÓN IA</div>
+  <div class="topbar-tabs">
+    <button class="tab-btn active" onclick="show(&#39;p-canvas&#39;,this)">① Canvas</button>
+    <button class="tab-btn" onclick="show(&#39;p-pipeline&#39;,this)">② Pipeline Técnico</button>
+    <button class="tab-btn" onclick="show(&#39;p-fases&#39;,this)">③ Fases ML</button>
+    <button class="tab-btn" onclick="show(&#39;p-lib&#39;,this)">④ Biblioteca</button>
+  </div>
+  <div class="topbar-right">
+    <div class="chip">EDITABLE</div>
+    <div class="chip">v2.0</div>
+  </div>
+</div>
+
+
+<!-- ══════════ PAGE 1: CANVAS ══════════ -->
+<div id="p-canvas" class="page active">
+
+  <div class="canvas-header">
+    <div class="canvas-title-area">
+      <h2>Canvas de Propuesta · Automatización IA</h2>
+      <p>Haz clic en cualquier campo para editarlo — adaptable a cualquier cliente u organización</p>
+    </div>
+  </div>
+
+  <!-- CONTEXT STRIP -->
+  <div class="section-head">Contexto del Proyecto</div>
+  <div class="context-strip">
+    <div class="ctx-field">
+      <div class="ctx-label">Organización</div>
+      <div class="ctx-value" contenteditable="true">Swagelok</div>
+    </div>
+    <div class="ctx-field">
+      <div class="ctx-label">Sector</div>
+      <div class="ctx-value" contenteditable="true">Ventas y data</div>
+    </div>
+    <div class="ctx-field">
+      <div class="ctx-label">Área impactada</div>
+      <div class="ctx-value" contenteditable="true">Operaciones / Docentes</div>
+    </div>
+    <div class="ctx-field">
+      <div class="ctx-label">Usuario final</div>
+      <div class="ctx-value" contenteditable="true">Profesores de campo</div>
+    </div>
+    <div class="ctx-field">
+      <div class="ctx-label">Presupuesto estimado</div>
+      <div class="ctx-value" contenteditable="true">Bajo / Sin licencias</div>
+    </div>
+    <div class="ctx-field">
+      <div class="ctx-label">Plazo MVP</div>
+      <div class="ctx-value" contenteditable="true">6–8 semanas</div>
+    </div>
+  </div>
+
+  <!-- MODULE 1: CONTEXTO -->
+  <div class="module mod-orange collapsed" id="m1">
+    <div class="module-header" onclick="toggle(&#39;m1&#39;)">
+      <div class="module-num">01</div>
+      <div class="module-icon">🔍</div>
+      <div>
+        <div class="module-title">Análisis de Contexto</div>
+        <div class="module-subtitle">¿Cuál es el problema real? ¿Quién lo sufre?</div>
+      </div>
+      <div class="module-toggle">▾</div>
+    </div>
+    <div class="module-body">
+      <div class="block">
+        <div class="block-label">Problema central</div>
+        <div class="block-content" contenteditable="true" data-placeholder="Describe el pain point principal...">Docentes de campo dedican 15 min/día a registrar asistencia manualmente en Excel. Datos llegan tarde a la directiva.</div>
+        <div class="block-tags"><span class="btag">pain point</span></div>
+      </div>
+      <div class="block">
+        <div class="block-label">Usuarios afectados</div>
+        <div class="block-content" contenteditable="true" data-placeholder="¿Quiénes y cuántos?">8 docentes After School + 3 coordinadores Podera. Acceso limitado a computadoras; solo celular.</div>
+        <div class="block-tags"><span class="btag">stakeholders</span></div>
+      </div>
+      <div class="block">
+        <div class="block-label">Proceso actual (AS-IS)</div>
+        <div class="block-content" contenteditable="true" data-placeholder="¿Cómo se hace hoy?">WhatsApp → foto de lista → digitación manual → Excel → envío por email a coordinación.</div>
+        <div class="block-tags"><span class="btag">as-is</span><span class="btag">proceso</span></div>
+      </div>
+      <div class="block">
+        <div class="block-label">Restricciones clave</div>
+        <div class="block-content" contenteditable="true" data-placeholder="Limitaciones técnicas, presupuesto, personas...">Sin presupuesto para licencias premium. Equipo no técnico. Conectividad intermitente en campo.</div>
+        <div class="block-tags"><span class="btag">constraints</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 2: OPORTUNIDAD IA -->
+  <div class="module mod-blue" id="m2">
+    <div class="module-header" onclick="toggle(&#39;m2&#39;)">
+      <div class="module-num">02</div>
+      <div class="module-icon">🤖</div>
+      <div>
+        <div class="module-title">Oportunidad de IA</div>
+        <div class="module-subtitle">¿Dónde y cómo puede aplicarse IA?</div>
+      </div>
+      <div class="module-toggle">▾</div>
+    </div>
+    <div class="module-body">
+      <div class="block">
+        <div class="block-label">Tipo de IA aplicable</div>
+        <div class="block-content" contenteditable="true" data-placeholder="NLP, visión, predicción, generativa...">NLP para interpretación de mensajes en lenguaje natural. LLM liviano para parsing flexible.</div>
+        <div class="block-tags"><span class="btag">NLP</span><span class="btag">LLM</span></div>
+      </div>
+      <div class="block">
+        <div class="block-label">Proceso a automatizar (TO-BE)</div>
+        <div class="block-content" contenteditable="true" data-placeholder="¿Cómo quedará el flujo con IA?">Docente escribe WhatsApp → chatbot interpreta → registra en Salesforce → dashboard actualizado en tiempo real.</div>
+        <div class="block-tags"><span class="btag">to-be</span><span class="btag">automatización</span></div>
+      </div>
+      <div class="block">
+        <div class="block-label">Dato de entrada</div>
+        <div class="block-content" contenteditable="true" data-placeholder="¿Qué datos alimentan la IA?">Mensajes de texto en WhatsApp. Ej: "Hoy faltó Pedro, María presente". Sin formato fijo.</div>
+        <div class="block-tags"><span class="btag">input</span><span class="btag">unstructured</span></div>
+      </div>
+      <div class="block">
+        <div class="block-label">Salida esperada</div>
+        <div class="block-content" contenteditable="true" data-placeholder="¿Qué produce la IA?">Registro estructurado en Salesforce: alumno, estado, fecha, docente. Confirmación automática al docente.</div>
+        <div class="block-tags"><span class="btag">output</span><span class="btag">CRM</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 3: STACK TECNOLÓGICO -->
+  <div class="module mod-green" id="m3">
+    <div class="module-header" onclick="toggle(&#39;m3&#39;)">
+      <div class="module-num">03</div>
+      <div class="module-icon">⚙️</div>
+      <div>
+        <div class="module-title">Stack Tecnológico</div>
+        <div class="module-subtitle">Herramientas y arquitectura propuesta</div>
+      </div>
+      <div class="module-toggle">▾</div>
+    </div>
+    <div class="module-body">
+      <div class="block">
+        <div class="block-label">Interfaz / Entrada</div>
+        <div class="block-content" contenteditable="true" data-placeholder="Canal de entrada del usuario...">WhatsApp Business via Twilio API. Sin app adicional para el usuario.</div>
+        <div class="block-tags"><span class="btag">WhatsApp</span><span class="btag">Twilio</span></div>
+      </div>
+      <div class="block">
+        <div class="block-label">Procesamiento / IA</div>
+        <div class="block-content" contenteditable="true" data-placeholder="Motor de procesamiento...">Python + spaCy / LLM API (OpenAI o local). Lógica de parsing y clasificación.</div>
+        <div class="block-tags"><span class="btag">Python</span><span class="btag">spaCy</span><span class="btag">LLM</span></div>
+      </div>
+      <div class="block">
+        <div class="block-label">Almacenamiento / CRM</div>
+        <div class="block-content" contenteditable="true" data-placeholder="Base de datos o CRM...">Salesforce via REST API. Flows nativos para automatizaciones sin código.</div>
+        <div class="block-tags"><span class="btag">Salesforce</span><span class="btag">REST API</span></div>
+      </div>
+      <div class="block">
+        <div class="block-label">Visualización</div>
+        <div class="block-content" contenteditable="true" data-placeholder="Dashboard / reporting...">Power BI conectado a Salesforce. Reportes de asistencia en tiempo real para directivos.</div>
+        <div class="block-tags"><span class="btag">Power BI</span><span class="btag">Dashboard</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULE 4: ROI SOCIAL -->
+  <div class="module mod-yellow" id="m4">
+    <div class="module-header" onclick="toggle(&#39;m4&#39;)">
+      <div class="module-num">04</div>
+      <div class="module-icon">📊</div>
+      <div>
+        <div class="module-title">Impacto y ROI</div>
+        <div class="module-subtitle">Valor medible para la organización</div>
+      </div>
+      <div class="module-toggle">▾</div>
+    </div>
+    <div class="module-body">
+      <div class="block">
+        <div class="block-label">Métrica de eficiencia</div>
+        <div class="block-content" contenteditable="true" data-placeholder="Reducción de tiempo, errores...">Tiempo de registro: 15 min → &lt;2 min por sesión. Ahorro: ~1h/docente/semana.</div>
+        <div class="block-tags"><span class="btag">eficiencia</span><span class="btag">KPI</span></div>
+      </div>
+      <div class="block">
+        <div class="block-label">Impacto en decisiones</div>
+        <div class="block-content" contenteditable="true" data-placeholder="Cómo mejora la toma de decisiones...">Directivos ven asistencia en tiempo real vs. datos con 24–48h de retraso hoy.</div>
+        <div class="block-tags"><span class="btag">data quality</span><span class="btag">decisiones</span></div>
+      </div>
+      <div class="block">
+        <div class="block-label">ROI social</div>
+        <div class="block-content" contenteditable="true" data-placeholder="Impacto en beneficiarios finales...">Intervención temprana posible para alumnos con baja asistencia. Impacto directo en retención escolar.</div>
+        <div class="block-tags"><span class="btag">impacto social</span><span class="btag">niños</span></div>
+      </div>
+      <div class="block">
+        <div class="block-label">Riesgos identificados</div>
+        <div class="block-content" contenteditable="true" data-placeholder="¿Qué puede fallar?">Resistencia al cambio de docentes. Mensajes ambiguos que confunden al NLP. Plan: sesiones de onboarding + modo fallback manual.</div>
+        <div class="block-tags"><span class="btag">riesgo</span><span class="btag">mitigation</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════ PAGE 2: PIPELINE TÉCNICO ══════════ -->
+<div id="p-pipeline" class="page">
+
+  <div class="canvas-header">
+    <div class="canvas-title-area">
+      <h2>Pipeline Técnico</h2>
+      <p>Arquitectura del flujo de automatización — editable por proyecto</p>
+    </div>
+  </div>
+
+  <div class="section-head">Flujo de Datos</div>
+  <div class="stack-flow">
+    <span class="stack-label" style="width:100%;margin-bottom:0">INTERFAZ</span>
+    <div class="stack-node" contenteditable="true">WhatsApp</div>
+    <div class="stack-arrow">→</div>
+    <div class="stack-node" contenteditable="true">Twilio API</div>
+    <div class="stack-arrow">→</div>
+    <div class="stack-node" contenteditable="true" style="color:var(--accent2)">Python NLP</div>
+    <div class="stack-arrow">→</div>
+    <div class="stack-node" contenteditable="true" style="color:var(--accent2)">LLM Parser</div>
+    <div class="stack-arrow">→</div>
+    <div class="stack-node" contenteditable="true" style="color:var(--accent3)">Salesforce API</div>
+    <div class="stack-arrow">→</div>
+    <div class="stack-node" contenteditable="true" style="color:var(--accent4)">Power BI</div>
+  </div>
+
+  <div class="section-head">Métricas Clave (editables)</div>
+  <div class="roi-row">
+    <div class="roi-card">
+      <div class="roi-unit">TIEMPO ANTES</div>
+      <div class="roi-val roi-orange" contenteditable="true">15 min</div>
+      <div class="roi-label">por sesión de registro</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-unit">TIEMPO DESPUÉS</div>
+      <div class="roi-val roi-green" contenteditable="true">&lt;2 min</div>
+      <div class="roi-label">vía chatbot</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-unit">ROI SEMANAL</div>
+      <div class="roi-val roi-blue" contenteditable="true">~8h</div>
+      <div class="roi-label">ahorradas (8 docentes)</div>
+    </div>
+  </div>
+
+  <div class="section-head">Módulos del Sistema</div>
+
+  <div class="module mod-orange" id="t1">
+    <div class="module-header" onclick="toggle(&#39;t1&#39;)">
+      <div class="module-num">A</div>
+      <div class="module-icon">📲</div>
+      <div><div class="module-title">Capa de Entrada</div><div class="module-subtitle">Canal de comunicación con el usuario</div></div>
+      <div class="module-toggle">▾</div>
+    </div>
+    <div class="module-body">
+      <div class="block"><div class="block-label">Canal</div><div class="block-content" contenteditable="true">WhatsApp Business API via Twilio. Webhook que recibe mensajes entrantes.</div><div class="block-tags"><span class="btag">Twilio</span><span class="btag">webhook</span></div></div>
+      <div class="block"><div class="block-label">Autenticación</div><div class="block-content" contenteditable="true">Número de teléfono registrado del docente. Lista blanca en base de datos.</div><div class="block-tags"><span class="btag">auth</span><span class="btag">seguridad</span></div></div>
+      <div class="block"><div class="block-label">Formato de entrada</div><div class="block-content" contenteditable="true">Texto libre. Sin formato obligatorio. Ej: "Hoy todos presentes excepto María".</div><div class="block-tags"><span class="btag">NL input</span></div></div>
+    </div>
+  </div>
+
+  <div class="module mod-blue" id="t2">
+    <div class="module-header" onclick="toggle(&#39;t2&#39;)">
+      <div class="module-num">B</div>
+      <div class="module-icon">🧠</div>
+      <div><div class="module-title">Capa de IA / Procesamiento</div><div class="module-subtitle">Interpretación y estructuración del lenguaje natural</div></div>
+      <div class="module-toggle">▾</div>
+    </div>
+    <div class="module-body">
+      <div class="block"><div class="block-label">Motor NLP</div><div class="block-content" contenteditable="true">Python + spaCy para NER (nombres). LLM (GPT-3.5 / local) para comprensión semántica compleja.</div><div class="block-tags"><span class="btag">spaCy</span><span class="btag">LLM</span><span class="btag">NER</span></div></div>
+      <div class="block"><div class="block-label">Lógica de parsing</div><div class="block-content" contenteditable="true">Extrae: alumno, estado (presente/ausente), fecha, observación. Confidence score para validación.</div><div class="block-tags"><span class="btag">parsing</span><span class="btag">confidence</span></div></div>
+      <div class="block"><div class="block-label">Fallback</div><div class="block-content" contenteditable="true">Si confidence &lt;80%: solicita confirmación al docente. Respuesta: "¿Confirmas: Pedro ausente, resto presentes?"</div><div class="block-tags"><span class="btag">UX</span><span class="btag">validación</span></div></div>
+    </div>
+  </div>
+
+  <div class="module mod-green" id="t3">
+    <div class="module-header" onclick="toggle(&#39;t3&#39;)">
+      <div class="module-num">C</div>
+      <div class="module-icon">🗄️</div>
+      <div><div class="module-title">Capa de Integración CRM</div><div class="module-subtitle">Escritura y lectura de datos en Salesforce</div></div>
+      <div class="module-toggle">▾</div>
+    </div>
+    <div class="module-body">
+      <div class="block"><div class="block-label">API Salesforce</div><div class="block-content" contenteditable="true">REST API con OAuth 2.0. Crea/actualiza objetos Custom: Asistencia__c, Alumno__c.</div><div class="block-tags"><span class="btag">REST</span><span class="btag">OAuth</span></div></div>
+      <div class="block"><div class="block-label">Salesforce Flows</div><div class="block-content" contenteditable="true">Flow automático al recibir registro: notifica coordinador si alumno acumula 3 ausencias.</div><div class="block-tags"><span class="btag">Flow</span><span class="btag">alerta</span></div></div>
+    </div>
+  </div>
+
+  <div class="module mod-yellow" id="t4">
+    <div class="module-header" onclick="toggle(&#39;t4&#39;)">
+      <div class="module-num">D</div>
+      <div class="module-icon">📈</div>
+      <div><div class="module-title">Capa de Monitoreo MLOps</div><div class="module-subtitle">Métricas del sistema y detección de degradación</div></div>
+      <div class="module-toggle">▾</div>
+    </div>
+    <div class="module-body">
+      <div class="block"><div class="block-label">Dashboard operativo</div><div class="block-content" contenteditable="true">Power BI: registros por día, tasa de confirmación, mensajes fallidos, precisión del parser.</div><div class="block-tags"><span class="btag">Power BI</span><span class="btag">KPIs</span></div></div>
+      <div class="block"><div class="block-label">Detección Data Drift</div><div class="block-content" contenteditable="true">Alerta si tasa de fallback supera 20% en 7 días → revisar vocabulario / reentrenar parser.</div><div class="block-tags"><span class="btag">Data Drift</span><span class="btag">MLOps</span></div></div>
+      <div class="block"><div class="block-label">Mantenimiento</div><div class="block-content" contenteditable="true">Revisión mensual de logs. Git para versión del código. CI/CD para deploy sin downtime.</div><div class="block-tags"><span class="btag">Git</span><span class="btag">CI/CD</span></div></div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════ PAGE 3: FASES ML ══════════ -->
+<div id="p-fases" class="page">
+
+  <div class="canvas-header">
+    <div class="canvas-title-area">
+      <h2>Ciclo de Vida ML — Discovery · Development · Deployment</h2>
+      <p>Marco metodológico aplicado al proyecto actual</p>
+    </div>
+  </div>
+
+  <div class="section-head">Vista general — 11 pasos</div>
+  <div class="timeline">
+    <div class="phase-col disc">
+      <div class="phase-col-head">🔵 DISCOVERY</div>
+      <div class="phase-step"><span class="ps-num">01</span> Business Use Case Definition</div>
+      <div class="phase-step"><span class="ps-num">02</span> Context Understanding</div>
+      <div class="phase-step"><span class="ps-num">03</span> Data Accessibility</div>
+      <div class="phase-step"><span class="ps-num">04</span> Architecture Selection</div>
+    </div>
+    <div class="phase-col dev">
+      <div class="phase-col-head">🔴 DEVELOPMENT</div>
+      <div class="phase-step"><span class="ps-num">05</span> Data Pipeline &amp; Features</div>
+      <div class="phase-step"><span class="ps-num">06</span> Model / Chatbot Building</div>
+      <div class="phase-step"><span class="ps-num">07</span> Evaluation &amp; Iteration</div>
+      <div class="phase-step"><span class="ps-num">08</span> MVP Presentation</div>
+    </div>
+    <div class="phase-col dep">
+      <div class="phase-col-head">🟡 DEPLOYMENT</div>
+      <div class="phase-step"><span class="ps-num">09</span> Plan for Deployment</div>
+      <div class="phase-step"><span class="ps-num">10</span> Operationalization</div>
+      <div class="phase-step"><span class="ps-num">11</span> Monitoring &amp; Maintenance</div>
+    </div>
+  </div>
+
+  <div class="section-head">Detalle por paso — editable</div>
+
+  <div class="module mod-orange" id="f1">
+    <div class="module-header" onclick="toggle(&#39;f1&#39;)">
+      <div class="module-num">01–04</div>
+      <div class="module-icon">🔍</div>
+      <div><div class="module-title">DISCOVERY — Entendimiento del Problema</div><div class="module-subtitle">30% del tiempo total de un proyecto ML</div></div>
+      <div class="module-toggle">▾</div>
+    </div>
+    <div class="module-body">
+      <div class="block"><div class="block-label">01 · Caso de uso</div><div class="block-content" contenteditable="true">Registro de asistencia vía WhatsApp. KPI: de 15 min → &lt;2 min. ROI social: intervención temprana.</div><div class="block-tags"><span class="btag">ROI</span><span class="btag">KPI</span></div></div>
+      <div class="block"><div class="block-label">02 · Contexto y usuarios</div><div class="block-content" contenteditable="true">Docentes con solo celular. Conectividad limitada. Resistencia a apps nuevas. Lenguaje informal.</div><div class="block-tags"><span class="btag">user research</span></div></div>
+      <div class="block"><div class="block-label">03 · Datos disponibles</div><div class="block-content" contenteditable="true">Salesforce ya tiene objetos Alumno, Sesión. Calidad: incompleta. Requiere limpieza y estandarización.</div><div class="block-tags"><span class="btag">data audit</span></div></div>
+      <div class="block"><div class="block-label">04 · Arquitectura elegida</div><div class="block-content" contenteditable="true">Twilio → Python NLP → Salesforce REST. Sin servidores costosos. Deploy en VPS ~$5/mes.</div><div class="block-tags"><span class="btag">stack</span><span class="btag">bajo costo</span></div></div>
+    </div>
+  </div>
+
+  <div class="module mod-blue" id="f2">
+    <div class="module-header" onclick="toggle(&#39;f2&#39;)">
+      <div class="module-num">05–08</div>
+      <div class="module-icon">🔨</div>
+      <div><div class="module-title">DEVELOPMENT — Construcción</div><div class="module-subtitle">Iteración → construir → evaluar → presentar</div></div>
+      <div class="module-toggle">▾</div>
+    </div>
+    <div class="module-body">
+      <div class="block"><div class="block-label">05 · Pipeline de datos</div><div class="block-content" contenteditable="true">Salesforce Flows para limpieza. Script Python de ingesta desde WhatsApp. Todo en Git.</div><div class="block-tags"><span class="btag">pipeline</span><span class="btag">Git</span></div></div>
+      <div class="block"><div class="block-label">06 · Construcción chatbot</div><div class="block-content" contenteditable="true">Parser NLP en Python. Integración Twilio ↔ Salesforce API. Respuesta automática de confirmación.</div><div class="block-tags"><span class="btag">NLP</span><span class="btag">chatbot</span></div></div>
+      <div class="block"><div class="block-label">07 · Evaluación</div><div class="block-content" contenteditable="true">Pruebas en Sandbox Salesforce. Meta: precisión &gt;90%. Iteración con docentes piloto (2 semanas).</div><div class="block-tags"><span class="btag">sandbox</span><span class="btag">métricas</span></div></div>
+      <div class="block"><div class="block-label">08 · Presentación MVP</div><div class="block-content" contenteditable="true">Demo a directivos. Dashboard Power BI con impacto en eficiencia. Validación antes de producción.</div><div class="block-tags"><span class="btag">MVP</span><span class="btag">demo</span></div></div>
+    </div>
+  </div>
+
+  <div class="module mod-green" id="f3">
+    <div class="module-header" onclick="toggle(&#39;f3&#39;)">
+      <div class="module-num">09–11</div>
+      <div class="module-icon">🚀</div>
+      <div><div class="module-title">DEPLOYMENT — Operación</div><div class="module-subtitle">Mantenimiento = 20% del tiempo total</div></div>
+      <div class="module-toggle">▾</div>
+    </div>
+    <div class="module-body">
+      <div class="block"><div class="block-label">09 · Plan de despliegue</div><div class="block-content" contenteditable="true">VPS seguro. Variables de entorno para credenciales. CI/CD via GitHub Actions. Checklist de seguridad.</div><div class="block-tags"><span class="btag">CI/CD</span><span class="btag">seguridad</span></div></div>
+      <div class="block"><div class="block-label">10 · Producción</div><div class="block-content" contenteditable="true">API REST live. Número Twilio de Kantaya. Salesforce org productiva. Prueba de carga con equipo completo.</div><div class="block-tags"><span class="btag">producción</span><span class="btag">go-live</span></div></div>
+      <div class="block"><div class="block-label">11 · Monitoreo MLOps</div><div class="block-content" contenteditable="true">Dashboard Power BI diario. Alertas de Data Drift. Reentrenamiento mensual. Logs en sistema.</div><div class="block-tags"><span class="btag">MLOps</span><span class="btag">Data Drift</span></div></div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════ PAGE 4: BIBLIOTECA ══════════ -->
+<div id="p-lib" class="page">
+
+  <div class="canvas-header">
+    <div class="canvas-title-area">
+      <h2>Biblioteca de Módulos</h2>
+      <p>Bloques reutilizables — elige los que aplican a cada proyecto nuevo</p>
+    </div>
+  </div>
+
+  <div class="section-head">Interfaces de entrada</div>
+  <div class="lib-grid">
+    <div class="lib-card lc-orange">
+      <div class="lib-card-icon">💬</div>
+      <div class="lib-card-name">WhatsApp Bot</div>
+      <div class="lib-card-desc">Entrada por mensajes de texto libre. Ideal para usuarios de campo sin acceso a apps. Twilio API.</div>
+      <div class="lib-card-tags"><span class="lib-tag">Twilio</span><span class="lib-tag">NLP</span><span class="lib-tag">bajo costo</span></div>
+    </div>
+    <div class="lib-card lc-blue">
+      <div class="lib-card-icon">📧</div>
+      <div class="lib-card-name">Email Trigger</div>
+      <div class="lib-card-desc">Automatización iniciada por correo electrónico. Integra con Gmail, Outlook, Power Automate.</div>
+      <div class="lib-card-tags"><span class="lib-tag">Power Automate</span><span class="lib-tag">Zapier</span></div>
+    </div>
+    <div class="lib-card lc-green">
+      <div class="lib-card-icon">📋</div>
+      <div class="lib-card-name">Formulario Web</div>
+      <div class="lib-card-desc">Google Forms / Typeform conectado a CRM. Entrada estructurada para usuarios con acceso a PC.</div>
+      <div class="lib-card-tags"><span class="lib-tag">Forms</span><span class="lib-tag">Zapier</span><span class="lib-tag">Sheets</span></div>
+    </div>
+    <div class="lib-card lc-yellow">
+      <div class="lib-card-icon">🎤</div>
+      <div class="lib-card-name">Voz (STT)</div>
+      <div class="lib-card-desc">Pipeline STT → NLP. Ideal para contextos de manos ocupadas o baja literacidad escrita.</div>
+      <div class="lib-card-tags"><span class="lib-tag">STT</span><span class="lib-tag">Python</span><span class="lib-tag">CHAVI-like</span></div>
+    </div>
+  </div>
+
+  <div class="section-head">Motores de IA</div>
+  <div class="lib-grid">
+    <div class="lib-card lc-blue">
+      <div class="lib-card-icon">🧠</div>
+      <div class="lib-card-name">LLM en la nube</div>
+      <div class="lib-card-desc">OpenAI GPT / Anthropic Claude API. Alta precisión, fácil integración. Requiere presupuesto para tokens.</div>
+      <div class="lib-card-tags"><span class="lib-tag">OpenAI</span><span class="lib-tag">Claude</span><span class="lib-tag">API</span></div>
+    </div>
+    <div class="lib-card lc-orange">
+      <div class="lib-card-icon">💻</div>
+      <div class="lib-card-name">LLM Local</div>
+      <div class="lib-card-desc">Llama, Mistral en hardware embebido o servidor propio. Sin costo por token. Privacidad total.</div>
+      <div class="lib-card-tags"><span class="lib-tag">Llama</span><span class="lib-tag">Jetson</span><span class="lib-tag">privacidad</span></div>
+    </div>
+    <div class="lib-card lc-green">
+      <div class="lib-card-icon">📝</div>
+      <div class="lib-card-name">NLP Clásico</div>
+      <div class="lib-card-desc">spaCy / NLTK para extracción de entidades y clasificación. Liviano, sin dependencia de APIs externas.</div>
+      <div class="lib-card-tags"><span class="lib-tag">spaCy</span><span class="lib-tag">NER</span><span class="lib-tag">offline</span></div>
+    </div>
+    <div class="lib-card lc-yellow">
+      <div class="lib-card-icon">🔮</div>
+      <div class="lib-card-name">Modelo Predictivo</div>
+      <div class="lib-card-desc">Regresión, clasificación, clustering para patrones en datos históricos. Scikit-learn / OCI.</div>
+      <div class="lib-card-tags"><span class="lib-tag">ML</span><span class="lib-tag">scikit-learn</span><span class="lib-tag">OCI</span></div>
+    </div>
+  </div>
+
+  <div class="section-head">Integraciones y CRM</div>
+  <div class="lib-grid">
+    <div class="lib-card lc-blue">
+      <div class="lib-card-icon">☁️</div>
+      <div class="lib-card-name">Salesforce</div>
+      <div class="lib-card-desc">CRM empresarial. REST API, Flows, Reports. Estándar en ONGs con Salesforce.org (licencias gratuitas).</div>
+      <div class="lib-card-tags"><span class="lib-tag">REST API</span><span class="lib-tag">Flows</span><span class="lib-tag">NPSP</span></div>
+    </div>
+    <div class="lib-card lc-orange">
+      <div class="lib-card-icon">🔗</div>
+      <div class="lib-card-name">Power Automate</div>
+      <div class="lib-card-desc">Automatización Microsoft 365. Conecta Excel, Teams, SharePoint, Outlook sin código.</div>
+      <div class="lib-card-tags"><span class="lib-tag">M365</span><span class="lib-tag">no-code</span></div>
+    </div>
+    <div class="lib-card lc-green">
+      <div class="lib-card-icon">⚡</div>
+      <div class="lib-card-name">Zapier / Make</div>
+      <div class="lib-card-desc">Conectores universales para integrar 1000+ apps sin programación. Ideal para pruebas rápidas de concepto.</div>
+      <div class="lib-card-tags"><span class="lib-tag">no-code</span><span class="lib-tag">rápido</span><span class="lib-tag">PoC</span></div>
+    </div>
+    <div class="lib-card lc-yellow">
+      <div class="lib-card-icon">📊</div>
+      <div class="lib-card-name">Power BI</div>
+      <div class="lib-card-desc">Dashboards ejecutivos conectados a Salesforce, Excel, SQL. Visualización para toma de decisiones.</div>
+      <div class="lib-card-tags"><span class="lib-tag">Power BI</span><span class="lib-tag">reportes</span></div>
+    </div>
+  </div>
+
+  <div class="section-head">Patrones de despliegue</div>
+  <div class="lib-grid">
+    <div class="lib-card lc-orange">
+      <div class="lib-card-icon">🌐</div>
+      <div class="lib-card-name">API REST + VPS</div>
+      <div class="lib-card-desc">Backend Python en servidor propio ($5–10/mes). Total control, escalable, sin vendor lock-in.</div>
+      <div class="lib-card-tags"><span class="lib-tag">FastAPI</span><span class="lib-tag">VPS</span><span class="lib-tag">Git</span></div>
+    </div>
+    <div class="lib-card lc-blue">
+      <div class="lib-card-icon">☁️</div>
+      <div class="lib-card-name">Serverless</div>
+      <div class="lib-card-desc">AWS Lambda / GCP Functions. Paga solo por uso. Ideal para cargas intermitentes como ONGs.</div>
+      <div class="lib-card-tags"><span class="lib-tag">Lambda</span><span class="lib-tag">GCP</span><span class="lib-tag">costo variable</span></div>
+    </div>
+    <div class="lib-card lc-green">
+      <div class="lib-card-icon">📦</div>
+      <div class="lib-card-name">Contenedor Docker</div>
+      <div class="lib-card-desc">Reproducibilidad garantizada. Fácil de migrar. Base para CI/CD con GitHub Actions.</div>
+      <div class="lib-card-tags"><span class="lib-tag">Docker</span><span class="lib-tag">CI/CD</span><span class="lib-tag">MLOps</span></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+function toggle(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+</script>
+
+
+</body></html>
